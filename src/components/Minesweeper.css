@@ -1,0 +1,19 @@
+.minesweeper-container {
+  max-width: 860px;
+  height: 100vh;
+  overflow: hidden;
+  margin: auto;
+  text-align: center;
+}
+
+.grid-container {
+  padding: 10px;
+  height: calc(100% - 220px);
+}
+
+.minesweeper-grid > div {
+  position: relative;
+  margin: auto;
+  border: 5px solid #a0a0a0;
+  border-radius: 3px;
+}

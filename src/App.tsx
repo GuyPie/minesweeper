@@ -1,25 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useReducer } from "react";
+import { MinesweeperContext, minesweeperReducer } from "./state";
+import { initBoard } from "./logic";
+import Minesweeper from "./components/Minesweeper";
+import { State, GameStatus } from "./types";
+
+const width = 10;
+const height = 10;
+const mineCount = 10;
+
+const stateString = localStorage.getItem("state");
+const initialState: State = stateString
+  ? (JSON.parse(stateString) as State)
+  : {
+      status: GameStatus.InProgress,
+      board: initBoard(width, height, mineCount),
+      width,
+      height,
+      mineCount,
+    };
 
 function App() {
+  const [state, dispatch] = useReducer(minesweeperReducer, initialState);
+  localStorage.setItem("state", JSON.stringify(state));
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <MinesweeperContext.Provider value={{ state, dispatch }}>
+      <Minesweeper />
+    </MinesweeperContext.Provider>
   );
 }
 

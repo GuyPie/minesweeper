@@ -1,0 +1,59 @@
+.cell-content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  background-color: #c0c0c0;
+  border: 1px solid #565656;
+  box-sizing: border-box;
+  box-shadow: 0px 1px 3px #383838;
+}
+
+.cell-content.revealed,
+.cell-content:active {
+  cursor: auto;
+  box-shadow: 1px 1px 3px #383838 inset;
+  background-color: #dadada;
+}
+
+.cell-content.one {
+  color: #0024f3;
+}
+
+.cell-content.two {
+  color: #377c21;
+}
+
+.cell-content.three {
+  color: #ea3323;
+}
+
+.cell-content.four {
+  color: #000d7b;
+}
+
+.cell-content.five {
+  color: #78150c;
+}
+
+.cell-content.six {
+  color: #377d7f;
+}
+
+.cell-content.seven {
+  color: black;
+}
+
+.cell-content.eight {
+  color: #808080;
+}
+
+.cell-content i {
+  color: black;
+}
+
+.cell-content i.bomb {
+  color: #ce1808;
+}
