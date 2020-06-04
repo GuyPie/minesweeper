@@ -4,7 +4,7 @@ import { FixedSizeGrid } from "react-window";
 import { MinesweeperContext } from "../state";
 import GridCellContainer from "./GridCellContainer";
 
-const Grid = () => {
+const Grid = React.forwardRef<FixedSizeGrid>((props, ref) => {
   const { state } = useContext(MinesweeperContext);
 
   return (
@@ -19,6 +19,7 @@ const Grid = () => {
             rowCount={state.height}
             rowHeight={50}
             width={containerWidth}
+            ref={ref}
           >
             {GridCellContainer}
           </FixedSizeGrid>
@@ -26,6 +27,6 @@ const Grid = () => {
       }}
     </AutoSizer>
   );
-};
+});
 
 export default Grid;
