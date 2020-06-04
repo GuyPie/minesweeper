@@ -37,28 +37,23 @@ export const initBoard = (
     ...initialCell,
   }));
 
-  const availableCoordinates = new Array<Coordinate>(width * height);
+  const mineIndexes = new Set<number>();
 
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      availableCoordinates[x * height + y] = { x, y };
-    }
-  }
-
-  for (let i = 0; i < mineCount; i++) {
-    const rand = Math.floor(Math.random() * availableCoordinates.length);
-    const { x, y } = availableCoordinates.splice(rand, 1)[0];
-    board[x * height + y].isMine = true;
+  while (mineIndexes.size < mineCount) {
+    let rand = Math.floor(Math.random() * width * height);
+    mineIndexes.add(rand);
   }
 
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
-      board[x * height + y].adjacentMinesCount = getAdjacentCoordinates(
+      const index = x * height + y;
+      board[index].isMine = mineIndexes.has(index);
+      board[index].adjacentMinesCount = getAdjacentCoordinates(
         board,
         { x, y },
         width,
         height
-      ).filter((cell) => board[cell.x * height + cell.y].isMine).length;
+      ).filter((cell) => mineIndexes.has(cell.x * height + cell.y)).length;
     }
   }
 
@@ -82,13 +77,8 @@ export const revealClearAdjacentCells = (
     return cell.status !== CellStatus.Revealed;
   });
 
-  while (true) {
-    const coordinate = adjacentCoordinates.shift();
-
-    if (!coordinate) {
-      return newBoard;
-    }
-
+  while (adjacentCoordinates.length) {
+    const coordinate = adjacentCoordinates.shift()!;
     const cell = newBoard[coordinate.x * height + coordinate.y];
 
     if (
@@ -101,8 +91,8 @@ export const revealClearAdjacentCells = (
       };
 
       if (!cell.adjacentMinesCount) {
-        adjacentCoordinates = adjacentCoordinates.concat(
-          getAdjacentCoordinates(board, coordinate, width, height).filter(
+        adjacentCoordinates.push(
+          ...getAdjacentCoordinates(board, coordinate, width, height).filter(
             (currCoordinate) => {
               const cell = board[currCoordinate.x * height + currCoordinate.y];
               return (
@@ -115,4 +105,6 @@ export const revealClearAdjacentCells = (
       }
     }
   }
+
+  return newBoard;
 };

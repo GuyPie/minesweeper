@@ -6,7 +6,6 @@ GitHub page: https://guypie.github.io/minesweeper/
 
 * Not nearly enough tests, it was under bonus tasks so I cut myself some slack there. The few existing tests can be run with 'npm test'.
 * Scrolling quickly in large grids looks choppy, due to the windowing of the game grid.
-* There can be a delay after clicking on a cell in large grids, although I did spend time optimizing it. For some reason it runs much faster on Chrome than on Firefox.
 * Usage of CSS is inconsistent, I use React UI's CSS utilities is some place and CSS files in others.
 
 ## Notes
