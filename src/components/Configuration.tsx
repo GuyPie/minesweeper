@@ -101,7 +101,9 @@ const Configuration = ({
         <Button
           variant="contained"
           color="primary"
-          onClick={() => newGame(width, height, mineCount)}
+          onClick={() =>
+            newGame(width, height, Math.min(mineCount, width * height))
+          }
         >
           New Game
         </Button>
