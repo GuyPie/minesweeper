@@ -1,17 +1,14 @@
 import React from "react";
 import { GridChildComponentProps, areEqual } from "react-window";
-import CellContainer from "./CellContainer";
+import Cell from "./Cell";
 import "./GridCellContainer.css";
 
-const GridCellContainer = React.memo(
-  (props: GridChildComponentProps) => (
-    <div style={props.style}>
-      <div className="cell">
-        <CellContainer y={props.rowIndex} x={props.columnIndex} />
-      </div>
+const GridCellContainer = (props: GridChildComponentProps) => (
+  <div style={props.style}>
+    <div className="cell">
+      <Cell y={props.rowIndex} x={props.columnIndex} />
     </div>
-  ),
-  areEqual
+  </div>
 );
 
-export default GridCellContainer;
+export default React.memo(GridCellContainer, areEqual);

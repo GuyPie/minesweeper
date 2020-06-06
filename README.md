@@ -10,4 +10,4 @@ GitHub page: https://guypie.github.io/minesweeper/
 
 ## Notes
 
-I keep the current app state in local storage, this wasn't in the requirements but I noticed the example minesweeper does the same. I also consider it a win if the number of uncleared and unflagged cells is equal to the remaing flags count.
+I keep the current app state in local storage, this wasn't in the requirements but I noticed the example minesweeper does the same. I also consider it a win if the number of uncleared cells is equal to the overall mines count.

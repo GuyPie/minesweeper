@@ -127,4 +127,4 @@ const Configuration = ({
   );
 };
 
-export default Configuration;
+export default React.memo(Configuration);

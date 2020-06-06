@@ -1,6 +1,8 @@
-import React from "react";
-import { Cell as CellType, CellStatus } from "../types";
-import "./Cell.css";
+import React, { useContext } from "react";
+import { Coordinate, CellStatus } from "../types";
+import { MinesweeperContext } from "../state";
+import { getCellByCoordinate } from "../selectors";
+import CellText from "./CellText";
 
 const adjacentMinesCountName = (n: number) => {
   switch (n) {
@@ -25,32 +27,17 @@ const adjacentMinesCountName = (n: number) => {
   }
 };
 
-const CellText = ({ cell }: { cell: CellType }) => {
-  if (
-    cell.status === CellStatus.Revealed ||
-    cell.status === CellStatus.Visible
-  ) {
-    if (cell.isMine) {
-      return <i className="material-icons bomb">new_releases</i>;
+const Cell = (coordinate: Coordinate) => {
+  const { state, dispatch } = useContext(MinesweeperContext);
+  const cell = getCellByCoordinate(state, coordinate);
+  const onClick = (e: React.MouseEvent) => {
+    if (!e.shiftKey) {
+      dispatch({ type: "CELL_REVEAL", payload: coordinate });
+    } else {
+      dispatch({ type: "CELL_FLAG", payload: coordinate });
     }
+  };
 
-    return <span>{cell.adjacentMinesCount || ""}</span>;
-  }
-
-  if (cell.status === CellStatus.Flagged) {
-    return <i className="material-icons flag">tour</i>;
-  }
-
-  return <span></span>;
-};
-
-const Cell = ({
-  cell,
-  onClick,
-}: {
-  cell: CellType;
-  onClick: (e: React.MouseEvent) => void;
-}) => {
   return (
     <div
       className={`cell-content ${CellStatus[
