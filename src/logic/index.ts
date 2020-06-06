@@ -1,12 +1,19 @@
 import { Board, Coordinate, Cell, CellStatus } from "../types";
 
-const getAdjacentCoordinates = (
-  board: Board,
+export const coordinateToIndex = ({ x, y }: Coordinate, height: number) =>
+  x * height + y;
+
+const indexToCoordinate = (index: number, height: number) => ({
+  x: Math.floor(index / height),
+  y: index % height,
+});
+
+const getAdjacentIndexes = (
   { x, y }: Coordinate,
   width: number,
   height: number
 ) => {
-  const adjacentCoordinates: Coordinate[] = [];
+  const adjacentCoordinates: Array<number> = [];
 
   for (let i = Math.max(x - 1, 0); i <= Math.min(x + 1, width - 1); i++) {
     for (let j = Math.max(y - 1, 0); j <= Math.min(y + 1, height - 1); j++) {
@@ -14,7 +21,7 @@ const getAdjacentCoordinates = (
         continue;
       }
 
-      adjacentCoordinates.push({ x: i, y: j });
+      adjacentCoordinates.push(coordinateToIndex({ x: i, y: j }, height));
     }
   }
 
@@ -40,20 +47,19 @@ export const initBoard = (
   const mineIndexes = new Set<number>();
 
   while (mineIndexes.size < mineCount) {
-    let rand = Math.floor(Math.random() * width * height);
+    const rand = Math.floor(Math.random() * width * height);
     mineIndexes.add(rand);
   }
 
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
-      const index = x * height + y;
+      const index = coordinateToIndex({ x, y }, height);
       board[index].isMine = mineIndexes.has(index);
-      board[index].adjacentMinesCount = getAdjacentCoordinates(
-        board,
+      board[index].adjacentMinesCount = getAdjacentIndexes(
         { x, y },
         width,
         height
-      ).filter((cell) => mineIndexes.has(cell.x * height + cell.y)).length;
+      ).filter((index) => mineIndexes.has(index)).length;
     }
   }
 
@@ -67,41 +73,41 @@ export const revealClearAdjacentCells = (
   height: number
 ) => {
   const newBoard = [...board];
-  let adjacentCoordinates = getAdjacentCoordinates(
-    board,
-    coordinate,
-    width,
-    height
-  ).filter((currCoordinate) => {
-    const cell = board[currCoordinate.x * height + currCoordinate.y];
-    return cell.status !== CellStatus.Revealed;
-  });
+  const adjacentIndexes = new Set(
+    getAdjacentIndexes(coordinate, width, height).filter(
+      (index) => board[index].status !== CellStatus.Revealed
+    )
+  );
 
-  while (adjacentCoordinates.length) {
-    const coordinate = adjacentCoordinates.shift()!;
-    const cell = newBoard[coordinate.x * height + coordinate.y];
+  for (const index of adjacentIndexes) {
+    const cell = newBoard[index];
 
     if (
       cell.status === CellStatus.Hidden ||
       cell.status === CellStatus.Visible
     ) {
-      newBoard[coordinate.x * height + coordinate.y] = {
+      newBoard[index] = {
         ...cell,
         status: CellStatus.Revealed,
       };
 
       if (!cell.adjacentMinesCount) {
-        adjacentCoordinates.push(
-          ...getAdjacentCoordinates(board, coordinate, width, height).filter(
-            (currCoordinate) => {
-              const cell = board[currCoordinate.x * height + currCoordinate.y];
-              return (
-                cell.status === CellStatus.Hidden ||
-                cell.status === CellStatus.Visible
-              );
-            }
-          )
+        const currAdjacentIndexes = getAdjacentIndexes(
+          indexToCoordinate(index, height),
+          width,
+          height
         );
+
+        for (const currIndex of currAdjacentIndexes) {
+          const cell = board[currIndex];
+
+          if (
+            cell.status === CellStatus.Hidden ||
+            cell.status === CellStatus.Visible
+          ) {
+            adjacentIndexes.add(currIndex);
+          }
+        }
       }
     }
   }

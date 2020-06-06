@@ -7,7 +7,7 @@ import {
   Coordinate,
   Board,
 } from "../types";
-import { revealClearAdjacentCells } from "../logic";
+import { revealClearAdjacentCells, coordinateToIndex } from "../logic";
 import { getCellByCoordinate, getFlaggedCells } from "../selectors";
 
 const revealCell = ({
@@ -30,7 +30,7 @@ const revealCell = ({
   }
 
   let newBoard = [...board];
-  newBoard[coordinate.x * height + coordinate.y] = {
+  newBoard[coordinateToIndex(coordinate, height)] = {
     ...cell,
     status: CellStatus.Revealed,
   };
@@ -77,7 +77,7 @@ const flagCell = ({
 
   const remainingFlags = mineCount - flaggedCells.length;
   const newBoard = [...board];
-  newBoard[coordinate.x * height + coordinate.y] = {
+  newBoard[coordinateToIndex(coordinate, height)] = {
     ...cell,
     status:
       cell.status === CellStatus.Hidden || cell.status === CellStatus.Visible
