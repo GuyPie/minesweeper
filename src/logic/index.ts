@@ -99,7 +99,7 @@ export const revealClearAdjacentCells = (
         );
 
         for (const currIndex of currAdjacentIndexes) {
-          const cell = board[currIndex];
+          const cell = newBoard[currIndex];
 
           if (
             cell.status === CellStatus.Hidden ||
