@@ -1,27 +1,28 @@
 import React, { useReducer } from "react";
+import localforage from "localforage";
 import { MinesweeperContext, minesweeperReducer } from "./state";
 import { initBoard } from "./logic";
 import Minesweeper from "./components/Minesweeper";
-import { State, GameStatus } from "./types";
+import { GameStatus, State } from "./types";
 
 const width = 10;
 const height = 10;
 const mineCount = 10;
 
-const stateString = localStorage.getItem("state");
-const initialState: State = stateString
-  ? (JSON.parse(stateString) as State)
-  : {
-      status: GameStatus.InProgress,
-      board: initBoard(width, height, mineCount),
-      width,
-      height,
-      mineCount,
-    };
+const initialState = {
+  status: GameStatus.InProgress,
+  board: initBoard(width, height, mineCount),
+  width,
+  height,
+  mineCount,
+};
 
-function App() {
-  const [state, dispatch] = useReducer(minesweeperReducer, initialState);
-  localStorage.setItem("state", JSON.stringify(state));
+function App({ persistedState }: { persistedState: State }) {
+  const [state, dispatch] = useReducer(
+    minesweeperReducer,
+    persistedState || initialState
+  );
+  localforage.setItem("state", state);
 
   return (
     <MinesweeperContext.Provider value={{ state, dispatch }}>
