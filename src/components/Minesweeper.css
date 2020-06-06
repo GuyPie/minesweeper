@@ -4,6 +4,7 @@
   overflow: hidden;
   margin: auto;
   text-align: center;
+  position: relative;
 }
 
 .grid-container {
