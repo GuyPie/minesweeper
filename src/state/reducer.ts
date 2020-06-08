@@ -1,47 +1,34 @@
-import {
-  State,
-  Action,
-  GameStatus,
-  Cell,
-  CellStatus,
-  Coordinate,
-  Board,
-} from "../types";
+import { State, Action, GameStatus, Cell, CellStatus, Board } from "../types";
 import { revealClearAdjacentCells, coordinateToIndex } from "../logic";
-import { getCellByCoordinate, getFlaggedCells } from "../selectors";
+import { getFlaggedCells } from "../selectors";
 
 const revealCell = ({
   board,
-  coordinate,
-  cell,
+  index,
   width,
   height,
   mineCount,
 }: {
   board: Board;
-  coordinate: Coordinate;
-  cell: Cell;
+  index: number;
   width: number;
   height: number;
   mineCount: number;
 }): [Board, GameStatus] => {
-  if (cell.status !== CellStatus.Hidden && cell.status !== CellStatus.Visible) {
-    return [board, GameStatus.InProgress];
-  }
-
   let newBoard = [...board];
-  newBoard[coordinateToIndex(coordinate, height)] = {
-    ...cell,
+  newBoard[index] = {
+    ...newBoard[index],
     status: CellStatus.Revealed,
   };
 
-  if (cell.isMine) {
+  if (newBoard[index].isMine) {
     return [newBoard, GameStatus.Lost];
   }
 
-  if (!cell.adjacentMinesCount) {
-    newBoard = revealClearAdjacentCells(newBoard, coordinate, width, height);
+  if (!newBoard[index].adjacentMinesCount) {
+    newBoard = revealClearAdjacentCells(newBoard, index, width, height);
   }
+
   const nonRevealedCells = newBoard.filter(
     (cell) => cell.status !== CellStatus.Revealed
   );
@@ -56,40 +43,33 @@ const revealCell = ({
 
 const flagCell = ({
   board,
+  index,
   flaggedCells,
-  coordinate,
-  cell,
-  height,
   mineCount,
   isSuperman,
 }: {
   board: Board;
+  index: number;
   flaggedCells: Cell[];
-  coordinate: Coordinate;
-  cell: Cell;
-  height: number;
   mineCount: number;
-  isSuperman: boolean;
+  isSuperman?: boolean;
 }): [Board, GameStatus] => {
-  if (cell.status === CellStatus.Revealed) {
-    return [board, GameStatus.InProgress];
-  }
-
   const remainingFlags = mineCount - flaggedCells.length;
   const newBoard = [...board];
-  newBoard[coordinateToIndex(coordinate, height)] = {
-    ...cell,
+  newBoard[index] = {
+    ...newBoard[index],
     status:
-      cell.status === CellStatus.Hidden || cell.status === CellStatus.Visible
-        ? CellStatus.Flagged
-        : isSuperman
-        ? CellStatus.Visible
-        : CellStatus.Hidden,
+      newBoard[index].status === CellStatus.Flagged
+        ? isSuperman
+          ? CellStatus.Visible
+          : CellStatus.Hidden
+        : CellStatus.Flagged,
   };
 
   if (
-    cell.isMine &&
+    newBoard[index].isMine &&
     remainingFlags === 1 &&
+    newBoard[index].status === CellStatus.Flagged &&
     !flaggedCells.find((cell) => !cell.isMine)
   ) {
     return [newBoard, GameStatus.Won];
@@ -105,11 +85,18 @@ const minesweeperReducer = (state: State, action: Action): State => {
         return state;
       }
 
-      const cell = getCellByCoordinate(state, action.payload);
+      const index = coordinateToIndex(action.payload, state.height);
+
+      if (
+        state.board[index].status !== CellStatus.Hidden &&
+        state.board[index].status !== CellStatus.Visible
+      ) {
+        return state;
+      }
+
       const [board, status] = revealCell({
         ...state,
-        cell,
-        coordinate: action.payload,
+        index,
       });
 
       return { ...state, board, status };
@@ -120,21 +107,25 @@ const minesweeperReducer = (state: State, action: Action): State => {
         return state;
       }
 
+      const index = coordinateToIndex(action.payload, state.height);
+
+      if (state.board[index].status === CellStatus.Revealed) {
+        return state;
+      }
+
       const flaggedCells = getFlaggedCells(state);
-      const cell = getCellByCoordinate(state, action.payload);
       const remainingFlags = state.mineCount - flaggedCells.length;
 
-      if (!remainingFlags && cell.status !== CellStatus.Flagged) {
+      if (!remainingFlags && state.board[index].status !== CellStatus.Flagged) {
         return { ...state, showOutOfFlags: true };
       }
 
       const [board, status] = flagCell({
         ...state,
+        index,
         flaggedCells,
-        cell,
-        coordinate: action.payload,
-        isSuperman: !!state.isSuperman,
       });
+
       return { ...state, board, status };
     }
 
@@ -151,17 +142,13 @@ const minesweeperReducer = (state: State, action: Action): State => {
         ...state,
         board: state.board.map((cell) => {
           if (action.payload) {
-            if (cell.status === CellStatus.Hidden) {
-              return { ...cell, status: CellStatus.Visible };
-            }
-
-            return cell;
+            return cell.status === CellStatus.Hidden
+              ? { ...cell, status: CellStatus.Visible }
+              : cell;
           } else {
-            if (cell.status === CellStatus.Visible) {
-              return { ...cell, status: CellStatus.Hidden };
-            }
-
-            return cell;
+            return cell.status === CellStatus.Visible
+              ? { ...cell, status: CellStatus.Hidden }
+              : cell;
           }
         }),
         isSuperman: action.payload,

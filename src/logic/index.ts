@@ -3,23 +3,9 @@ import { Board, Coordinate, CellStatus } from "../types";
 export const coordinateToIndex = ({ x, y }: Coordinate, height: number) =>
   x * height + y;
 
-const getIndexAdjacentIndexes = (
-  index: number,
-  width: number,
-  height: number
-) => {
-  return getCoordinateAdjacentIndexes(
-    { x: Math.floor(index / height), y: index % height },
-    width,
-    height
-  );
-};
-
-const getCoordinateAdjacentIndexes = (
-  { x, y }: Coordinate,
-  width: number,
-  height: number
-) => {
+const getAdjacentIndexes = (index: number, width: number, height: number) => {
+  const x = Math.floor(index / height);
+  const y = index % height;
   const adjacentIndexes: Array<number> = [];
 
   for (let i = Math.max(x - 1, 0); i <= Math.min(x + 1, width - 1); i++) {
@@ -53,11 +39,9 @@ export const initBoard = (
     board[i] = {
       status: isSuperman ? CellStatus.Visible : CellStatus.Hidden,
       isMine: mineIndexes.has(i),
-      adjacentMinesCount: getIndexAdjacentIndexes(
-        i,
-        width,
-        height
-      ).filter((index) => mineIndexes.has(index)).length,
+      adjacentMinesCount: getAdjacentIndexes(i, width, height).filter((index) =>
+        mineIndexes.has(index)
+      ).length,
     };
   }
 
@@ -66,13 +50,13 @@ export const initBoard = (
 
 export const revealClearAdjacentCells = (
   board: Board,
-  coordinate: Coordinate,
+  index: number,
   width: number,
   height: number
 ) => {
   const newBoard = [...board];
   const adjacentIndexes = new Set(
-    getCoordinateAdjacentIndexes(coordinate, width, height).filter(
+    getAdjacentIndexes(index, width, height).filter(
       (index) => board[index].status !== CellStatus.Revealed
     )
   );
@@ -90,11 +74,7 @@ export const revealClearAdjacentCells = (
       };
 
       if (!cell.adjacentMinesCount) {
-        const currAdjacentIndexes = getIndexAdjacentIndexes(
-          index,
-          width,
-          height
-        );
+        const currAdjacentIndexes = getAdjacentIndexes(index, width, height);
 
         for (const currIndex of currAdjacentIndexes) {
           adjacentIndexes.add(currIndex);
